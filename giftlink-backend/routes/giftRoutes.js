@@ -1,39 +1,39 @@
+const express = require('express');
+const router = express.Router();
+const { body, param, validationResult } = require('express-validator');
+const { ObjectId } = require('mongodb'); // Required for converting ID from string to ObjectId
+const connectToDatabase = require('../models/db'); // Adjust path as necessary to match your directory structure
+
+// GET all gifts
 router.get('/', async (req, res) => {
     try {
-        // Task 1: Connect to MongoDB and store connection to db constant
-        // const db = {{insert code here}}
-
-        // Task 2: use the collection() method to retrieve the gift collection
-        // {{insert code here}}
-
-        // Task 3: Fetch all gifts using the collection.find method. Chain with toArray method to convert to JSON array
-        // const gifts = {{insert code here}}
-
-        // Task 4: return the gifts using the res.json method
-        res.json(/* {{insert code here}} */);
+        const db = await connectToDatabase();
+        const collection = db.collection('gifts');
+        const gifts = await collection.find({}).toArray();
+        res.json(gifts);
     } catch (e) {
         console.error('Error fetching gifts:', e);
         res.status(500).send('Error fetching gifts');
     }
 });
 
-router.get('/:id', async (req, res) => {
+// GET a specific gift by ID
+router.get('/:id', [
+    param('id').isMongoId().withMessage('Invalid MongoDB ID') // Validate that ID is a valid MongoDB ObjectId
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
-        // Task 1: Connect to MongoDB and store connection to db constant
-        // const db = {{insert code here}}
-
-        // Task 2: use the collection() method to retrieve the gift collection
-        // {{insert code here}}
-
+        const db = await connectToDatabase();
+        const collection = db.collection('gifts');
         const id = req.params.id;
-
-        // Task 3: Find a specific gift by ID using the collection.fineOne method and store in constant called gift
-        // {{insert code here}}
-
+        const gift = await collection.findOne({ _id: new ObjectId(id) });
         if (!gift) {
             return res.status(404).send('Gift not found');
         }
-
         res.json(gift);
     } catch (e) {
         console.error('Error fetching gift:', e);
@@ -41,18 +41,24 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// POST a new gift
+router.post('/', [
+    body('name').not().isEmpty().withMessage('Name cannot be empty').trim().escape(),
+    body('description').not().isEmpty().withMessage('Description cannot be empty').trim().escape()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
-
-// Add a new gift
-router.post('/', async (req, res, next) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
         const gift = await collection.insertOne(req.body);
-
         res.status(201).json(gift.ops[0]);
     } catch (e) {
-        next(e);
+        console.error('Error adding new gift:', e);
+        res.status(500).send('Error adding new gift');
     }
 });
 
