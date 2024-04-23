@@ -5,37 +5,36 @@ const connectToDatabase = require('../models/db');
 // Search for gifts
 router.get('/', async (req, res, next) => {
     try {
-        // Task 1: Connect to MongoDB using connectToDatabase database. Remember to use the await keyword and store the connection in `db`
-        // {{insert code here}}
+        // Task 1: Connect to MongoDB using connectToDatabase. Store the connection in `db`
+        const db = await connectToDatabase();  
 
         const collection = db.collection("gifts");
 
         // Initialize the query object
         let query = {};
 
-        // Add the name filter to the query if the name parameter is not empty
-        // if (/* {{insert code here}} */) {
-            query.name = { $regex: req.query.name, $options: "i" }; // Using regex for partial match, case-insensitive
-        // }
+        // Task 2: Check if the name exists and is not empty
+        if (req.query.name && req.query.name.trim() !== '') {
+            query.name = { $regex: req.query.name, $options: "i" }; 
+        }
 
         // Task 3: Add other filters to the query
         if (req.query.category) {
-            // {{insert code here}}
+            query.category = req.query.category;  // Added category filter to the query
         }
         if (req.query.condition) {
-            // {{insert code here}} 
+            query.condition = req.query.condition;  // Added condition filter to the query
         }
         if (req.query.age_years) {
-            // {{insert code here}}
-            query.age_years = { $lte: parseInt(req.query.age_years) };
+            query.age_years = { $lte: parseInt(req.query.age_years) };  // Added age filter to the query, converting age to integer
         }
 
-        // Task 4: Fetch filtered gifts using the find(query) method. Make sure to use await and store the result in the `gifts` constant
-        // {{insert code here here}}
+        // Task 4: Fetch filtered gifts using the find(query) method
+        const gifts = await collection.find(query).toArray();  
 
-        res.json(gifts);
+        res.json(gifts);  
     } catch (e) {
-        next(e);
+        next(e);  
     }
 });
 

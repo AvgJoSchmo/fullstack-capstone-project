@@ -8,7 +8,7 @@ const { loadData } = require("./util/import-mongo/index");
 
 // Route imports
 const giftRoutes = require('./routes/giftRoutes');
-const searchRoutes = require('./routes/searchRoutes');
+const searchRoutes = require('./routes/searchRoutes'); // Task 1: Import searchRoutes
 
 const app = express();
 app.use("*", cors());
@@ -30,7 +30,7 @@ app.use(pinoHttp({ logger }));
 
 // Use routes
 app.use('/api/gifts', giftRoutes);    // Attach giftRoutes to your Express app
-app.use('/api/search', searchRoutes); // Attach searchRoutes to your Express app
+app.use('/api/search', searchRoutes); // Task 2: Attach searchRoutes to your Express app
 
 // Global Error Handler
 app.use((err, req, res, next) => {
