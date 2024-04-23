@@ -1,19 +1,85 @@
-/* Task 1: Style the body */
+/* Style the body - Task 1 */
 body {
-    /* insert code here */
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f4f4f4;
 }
 
-/* Task 2: Create a pseudo-element for the background and blur */
+/* Create a pseudo-element for the background and blur - Task 2 */
 body::before {
-    /* insert code here */
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/static/background-colors.jpg') no-repeat center center/cover;
+    filter: blur(8px);
+    z-index: -1;
 }
 
-/* Task 3: Style the content area */
+/* Style the content area - Task 3 */
 .content {
-    /* insert code here */
+    position: relative;
+    font-weight: 600; /* Enhance font weight for better readability */
+    z-index: 2;
+    text-align: center;
+    color: #333;
+    max-width: 90%;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.7); /* Adjust transparency for a lighter background */
+    border-radius: 10px; /* Rounded corners for the content box */
 }
 
-/* Task 4: Add styles for headings, paragraphs, and buttons */
+/* Add styles for headings, paragraphs, and buttons - Task 4 */
 h1, h2, .lead, .btn-primary {
-    /* insert code here */
+    color: #333; /* Uniform color for better consistency */
+}
+
+h1 {
+    font-size: 2.5rem; /* Larger size for main heading */
+    font-weight: 700; /* Bold font weight */
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 400; /* Normal weight for subheading */
+}
+
+.lead {
+    font-size: 1.2rem;
+    margin-bottom: 20px; /* Add space below the quote */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Text shadow for enhanced legibility */
+}
+
+.btn-primary {
+    font-size: 1rem;
+    padding: 10px 20px; /* Padding for better button sizing */
+    background-color: #1E90FF; /* Vibrant blue for the button */
+    border: none;
+    border-radius: 5px; /* Maintained rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+    transition: background-color 0.3s, transform 0.1s; /* Added transform to transitions */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+    color: #fff; /* Ensure text color is white on hover for better visibility */
+}
+
+/* Responsive Design for mobile devices */
+@media (max-width: 768px) {
+    h1, h2 {
+        font-size: 20px; /* Smaller font size for headings on mobile */
+    }
+    .lead {
+        font-size: 14px; /* Smaller font size for lead text on mobile */
+    }
 }
