@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const connectToDatabase = require('../models/db');
+const { ObjectId } = require('mongodb'); // Include ObjectId for MongoDB
 const logger = require('../logger');
 
 // Get all gifts
@@ -8,7 +9,6 @@ router.get('/', async (req, res, next) => {
     logger.info('/ called');
     try {
         const db = await connectToDatabase();
-
         const collection = db.collection("gifts");
         const gifts = await collection.find({}).toArray();
         res.json(gifts);
@@ -24,7 +24,7 @@ router.get('/:id', async (req, res, next) => {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
         const id = req.params.id;
-        const gift = await collection.findOne({ id: id });
+        const gift = await collection.findOne({ _id: new ObjectId(id) }); // Corrected to use _id with ObjectId
 
         if (!gift) {
             return res.status(404).send("Gift not found");
@@ -36,14 +36,12 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-
 // Add a new gift
 router.post('/', async (req, res, next) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
         const gift = await collection.insertOne(req.body);
-
         res.status(201).json(gift.ops[0]);
     } catch (e) {
         next(e);
