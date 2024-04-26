@@ -1,61 +1,39 @@
-/*jshint esversion: 8 */
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const pinoLogger = require('./logger');
-const connectToDatabase = require('./models/db');
+const router = express.Router();
+const connectToDatabase = require('../models/db');
 
-// Route imports
-const giftRoutes = require('./routes/giftRoutes');
-const authRoutes = require('./routes/authRoutes'); // Added authentication routes
-const searchRoutes = require('./routes/searchRoutes');
+// Search for gifts
+router.get('/', async (req, res, next) => {
+    try {
 
-const app = express();
-app.use("*", cors());
-const port = 3050; // Standardized port to match Gandorc's version
+        // Task 1: Connect to MongoDB
+        const db = await connectToDatabase();
+        const collection = db.collection("gifts");
+        // Initialize the query object
+        let query = {};
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
+        // Task 2: check if the name exists and is not empty
+        if (req.query.name && req.query.name.trim() !== '') {
+            query.name = { $regex: req.query.name, $options: "i" }; // Using regex for partial match, case-insensitive
+        }
 
-// Serve static files for React App from a subdirectory
-app.use('/app', express.static(path.join(__dirname, 'public', 'react-app')));
+        // Task 3: Add other filters to the query
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+        if (req.query.condition) {
+            query.condition = req.query.condition;
+        }
+        if (req.query.age_years) {
+            query.age_years = { $lte: parseInt(req.query.age_years) };
+        }
 
-// Connect to MongoDB; do this once at startup
-connectToDatabase().then(() => {
-    pinoLogger.info('Connected to DB');
-}).catch((e) => {
-    console.error('Failed to connect to DB', e);
+        // Task 4: Fetch filtered gifts
+        const gifts = await collection.find(query).toArray();
+        res.json(gifts);
+    } catch (e) {
+        next(e);
+    }
 });
 
-app.use(express.json());
-
-// Setup logger
-const pinoHttp = require('pino-http');
-const logger = require('./logger');
-app.use(pinoHttp({ logger }));
-
-// Use routes
-app.use('/api/gifts', giftRoutes);
-app.use('/api/auth', authRoutes); // Attach authentication routes
-app.use('/api/search', searchRoutes);
-
-// Route for Home Page - Serve home.html as the default page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'home.html'));
-});
-
-// Serve the React app's index.html for any other requests under /app
-app.get('/app/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'react-app', 'index.html'));
-});
-
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+module.exports = router;
